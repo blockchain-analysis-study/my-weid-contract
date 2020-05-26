@@ -104,9 +104,9 @@ contract CptController {
 
     // 注册CPT 模板的 event
     event RegisterCptRetLog(
-        uint retCode, 
-        uint cptId, 
-        int cptVersion
+        uint retCode,   // 操作结果状态码, 0 成功, 其他失败
+        uint cptId,     // cptId
+        int cptVersion  // cpt version
     );
 
     // 更新 CPT 模板的 event
@@ -117,26 +117,30 @@ contract CptController {
     );
 
 
-    // todo 注册 CPT 模板信息
+    // todo 注册 CPT 模板信息 (方法重载)  主要留给注册 系统级别的 CPT模板用 或者 权威发行者 代理调用 设置CPT
     function registerCpt(
-        uint cptId,                         // 当前 CPT Id
+        uint cptId,                          // 当前 CPT Id
 
-        //
-        address publisher,                  // 发布该 cpt 模板的 个人或者机构的 WeId
-        int[8] intArray, 
-        bytes32[8] bytes32Array,
-        bytes32[128] jsonSchemaArray, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
+        address publisher,                   // 发布该 cpt 模板的 个人或者机构的 WeId
+        int[8] intArray,                     // int[8]{0<version>, createTimeStamp}
+        bytes32[8] bytes32Array,             // bytes32[8]{0,0,...,0}
+        bytes32[128] jsonSchemaArray,        // bytes32[128]{} (cptjsonStr)
+
+        // signature = sign(publisher|cptjsonStr)
+        uint8 v,                             // 签名中的 V
+        bytes32 r,                           // 签名中的 R
+        bytes32 s                            // 签名中的 S
     )
         public
         returns (bool)
     {
+        // 先判断, 当前 发布者的WeId是否存在
         if (!weIdContract.isIdentityExist(publisher)) {
             RegisterCptRetLog(CPT_PUBLISHER_NOT_EXIST, 0, 0);
             return false;
         }
+
+        // 校验当前 cptId 是否已经存在
         if (cptData.isCptExist(cptId)) {
             RegisterCptRetLog(CPT_ALREADY_EXIST, cptId, 0);
             return false;
@@ -144,94 +148,145 @@ contract CptController {
 
         // Authority related checks. We use tx.origin here to decide the authority. For SDK
         // calls, publisher and tx.origin are normally the same. For DApp calls, tx.origin dictates.
-        uint lowId = cptData.AUTHORITY_ISSUER_START_ID();
-        uint highId = cptData.NONE_AUTHORITY_ISSUER_START_ID();
+        //
+        // 权限相关检查。 我们在这里使用tx.origin来确定权限。
+        // 对于SDK调用，publisher和tx.origin通常是相同的。
+        // 对于DApp调用，由tx.origin指示
+        uint lowId = cptData.AUTHORITY_ISSUER_START_ID();           // 这里的这个值是 1000
+        uint highId = cptData.NONE_AUTHORITY_ISSUER_START_ID();     // 这里的这个值是 200W
+
+        // 如果 当前 cptId 小于 1000, 则这是 系统级别的 cpt模板设置
         if (cptId < lowId) {
             // Only committee member can create this, check initialization first
+            //
+            // 只有委员会成员才能创建此文件，请先检查初始化
             if (internalRoleControllerAddress == 0x0) {
                 RegisterCptRetLog(NO_PERMISSION, cptId, 0);
                 return false;
             }
+
+            // 校验当前 tx的原始发送者 是否是 admin 或者委员会成员
             if (!roleController.checkPermission(tx.origin, roleController.MODIFY_AUTHORITY_ISSUER())) {
                 RegisterCptRetLog(NO_PERMISSION, cptId, 0);
                 return false;
             }
-        } else if (cptId < highId) {
+        } else if (cptId < highId) { // 否则, 是权威发行者 的 cpt
             // Only authority issuer can create this, check initialization first
+            //
+            // 只有 授权发行者 才能创建此文件，请先检查初始化
             if (internalRoleControllerAddress == 0x0) {
                 RegisterCptRetLog(NO_PERMISSION, cptId, 0);
                 return false;
             }
+
+            // 校验 当前 tx的原始发送者 是否具备设置 CPT 模板
             if (!roleController.checkPermission(tx.origin, roleController.MODIFY_KEY_CPT())) {
                 RegisterCptRetLog(NO_PERMISSION, cptId, 0);
                 return false;
             }
         }
 
+        // 设置 cpt 版本号, 默认先使用 默认的版本号
         int cptVersion = CPT_DEFAULT_VERSION;
         intArray[0] = cptVersion;
+
+        // 设置一个新的 cpt 模板
         cptData.putCpt(cptId, publisher, intArray, bytes32Array, jsonSchemaArray, v, r, s);
 
+        // 记录event
         RegisterCptRetLog(0, cptId, cptVersion);
         return true;
     }
 
+    // todo 注册 CPT 模板信息 (方法重载)
     function registerCpt(
-        address publisher, 
-        int[8] intArray, 
-        bytes32[8] bytes32Array,
-        bytes32[128] jsonSchemaArray, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
+        address publisher,                          // 发布该 cpt 模板的 个人或者机构的 WeId
+        int[8] intArray,                            // int[8]{0<version>, createTimeStamp}
+        bytes32[8] bytes32Array,                    // bytes32[8]{0,0,...,0}
+        bytes32[128] jsonSchemaArray,               // bytes32[128]{} (cptjsonStr)
+
+        // signature = sign(publisher|cptjsonStr)
+        uint8 v,                                    // 签名中的 V
+        bytes32 r,                                  // 签名中的 R
+        bytes32 s                                   // 签名中的 S
     ) 
         public 
         returns (bool) 
     {
+
+        // 先判断, 当前 发布者的WeId是否存在
         if (!weIdContract.isIdentityExist(publisher)) {
             RegisterCptRetLog(CPT_PUBLISHER_NOT_EXIST, 0, 0);
             return false;
         }
 
-        uint cptId = cptData.getCptId(publisher); 
+        // 根据 发布者的 weId 获取 cptId
+        uint cptId = cptData.getCptId(publisher);
+
+        // 0, 标书非法的 cptId
         if (cptId == 0) {
             RegisterCptRetLog(AUTHORITY_ISSUER_CPT_ID_EXCEED_MAX, 0, 0);
             return false;
         }
+
+        // 设置 cpt 版本号, 默认先使用 默认的版本号
         int cptVersion = CPT_DEFAULT_VERSION;
+
+        // intArray[8]{version. createTime, updateTime, ...预留位}
         intArray[0] = cptVersion;
+
+        // 设置一个新的 cpt 模板
         cptData.putCpt(cptId, publisher, intArray, bytes32Array, jsonSchemaArray, v, r, s);
 
+        // 记录event
         RegisterCptRetLog(0, cptId, cptVersion);
         return true;
     }
 
+
+    // 更新对应 cptId 的 cpt模板信息
     function updateCpt(
-        uint cptId, 
-        address publisher, 
-        int[8] intArray, 
-        bytes32[8] bytes32Array,
-        bytes32[128] jsonSchemaArray, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
+        uint cptId,                         // 当前 CPT Id
+        address publisher,                  // 发布该 cpt 模板的 个人或者机构的 WeId
+        int[8] intArray,                    // int[8]{0<version>, createTimeStamp}
+        bytes32[8] bytes32Array,            // bytes32[8]{0,0,...,0}
+        bytes32[128] jsonSchemaArray,       // bytes32[128]{} (cptjsonStr)
+
+        // signature = sign(publisher|cptjsonStr)
+        uint8 v,                            // 签名中的 V
+        bytes32 r,                          // 签名中的 R
+        bytes32 s                           // 签名中的 S
     ) 
         public 
         returns (bool) 
     {
+
+        // 先判断, 当前 发布者的WeId是否存在
         if (!weIdContract.isIdentityExist(publisher)) {
             UpdateCptRetLog(CPT_PUBLISHER_NOT_EXIST, 0, 0);
             return false;
         }
+
+        // 校验当前 tx的原始发送者 是否是 admin 或者委员会成员
         if (!roleController.checkPermission(tx.origin, roleController.MODIFY_AUTHORITY_ISSUER())
+
+            // todo 本次发起修改请求的 发布者一定要是 cpt模板的原始 发布者 才有权限
             && publisher != cptData.getCptPublisher(cptId)) {
             UpdateCptRetLog(NO_PERMISSION, 0, 0);
             return false;
         }
+
+        // 当前 cpt 模板信息是否存在
         if (cptData.isCptExist(cptId)) {
+
+            // 读取 intArray[8]{version. createTime, updateTime, ...预留位} 信息
             int[8] memory cptIntArray = cptData.getCptIntArray(cptId);
+
+            // 递增 版本号
             int cptVersion = cptIntArray[0] + 1;
             intArray[0] = cptVersion;
+
+            // 使用旧的 createTimeStamp, 因为 createTime 不可能因为 udate 动作而变更吧
             int created = cptIntArray[1];
             intArray[1] = created;
             cptData.putCpt(cptId, publisher, intArray, bytes32Array, jsonSchemaArray, v, r, s);
@@ -310,24 +365,38 @@ contract CptController {
     }
 
     //store the cptId and blocknumber
+    //
+    // 当存储了 (第三方) credential 模板时, 才会存储的 cptId => blockNumber
     mapping (uint => uint) credentialTemplateStored;
+
+
+    // 记录 存储第三方 credential 模板时的event
     event CredentialTemplate(
         uint cptId,
         bytes credentialPublicKey,
         bytes credentialProof
     );
 
+
+    // 设置 Credential 模板  if the cpt is not zkp type, no need to make template.
+    //
+    // 主要是  第三方 Credential 模板发布者给的pubKey 和 零知识 proof todo <模板信息在 proof中??>
+    //
+    // todo 注意, 我们一般在 注册了 cpt模板 (调用 registerCpt()) 之后, 需要根据该 CPT 模板的 type 是 original 还是 zkp 决定是否继续轻轻第三方 credential 模板, 并记录相关 zkp信息
     function putCredentialTemplate(
-        uint cptId,
-        bytes credentialPublicKey,
-        bytes credentialProof
+        uint cptId,                     // 当前 credential 模板的 claim 模板 Id
+        bytes credentialPublicKey,      // credential 发行方给的 零知识证明的pubkey
+        bytes credentialProof           // credential 发行方给的 当前 credential 的零知识证明
     )
         public
     {
+
+        // 记录 credential 模板的 pubKey 和 零知识证明 proof
         CredentialTemplate(cptId, credentialPublicKey, credentialProof);
         credentialTemplateStored[cptId] = block.number;
     }
 
+    // 根据 cptId 获取 credential 模板设置时的 blockNumber
     function getCredentialTemplateBlock(
         uint cptId
     )
