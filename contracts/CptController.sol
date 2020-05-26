@@ -22,9 +22,12 @@ import "./CptData.sol";
 import "./WeIdContract.sol";
 import "./RoleController.sol";
 
+// Claim Protocol Type (CPT) 流程控制合约
 contract CptController {
 
     // Error codes
+    //
+    // 一些 错误码
     uint constant private CPT_NOT_EXIST = 500301;
     uint constant private AUTHORITY_ISSUER_CPT_ID_EXCEED_MAX = 500302;
     uint constant private CPT_PUBLISHER_NOT_EXIST = 500303;
@@ -32,57 +35,92 @@ contract CptController {
     uint constant private NO_PERMISSION = 500305;
 
     // Default CPT version
+    //
+    // 默认的 CPT 版本
     int constant private CPT_DEFAULT_VERSION = 1;
 
+
+    // CPT 数据合约
     CptData private cptData;
+
+    // WeId合约
     WeIdContract private weIdContract;
+
+    // 权限控制合约
     RoleController private roleController;
 
     // Reserved for contract owner check
+    //
+    // 保留给 合约所有者 检查
+
+    // 这个是对应的 role 合约的地址
     address private internalRoleControllerAddress;
+
+    // 部署当前合约的 msg.sender
     address private owner;
 
+
+    // todo 构造函数
     function CptController(
         address cptDataAddress,
         address weIdContractAddress
     ) 
         public
     {
+
+        // 设置 owner 为 msg.sender
         owner = msg.sender;
+
+        // 实例化
         cptData = CptData(cptDataAddress);
+        // 实例化
         weIdContract = WeIdContract(weIdContractAddress);
     }
 
+
+    // 设置对应的 role合约地址
     function setRoleController(
         address roleControllerAddress
     )
         public
     {
+
+        // todo 只有 msg.sender 是 当前合约的 owner 时 且 入参的role合约地址不为空时
+        // 校验才通过
         if (msg.sender != owner || roleControllerAddress == 0x0) {
             return;
         }
+
+        // 实例化 role合约
         roleController = RoleController(roleControllerAddress);
-        if (roleController.ROLE_ADMIN() <= 0) {
+        if (roleController.ROLE_ADMIN() <= 0) { // 其实这一句 一般不会走的
             return;
         }
+
+        // 记录 role 合约的地址
         internalRoleControllerAddress = roleControllerAddress;
     }
 
+
+    // 注册CPT 模板的 event
     event RegisterCptRetLog(
         uint retCode, 
         uint cptId, 
         int cptVersion
     );
 
+    // 更新 CPT 模板的 event
     event UpdateCptRetLog(
         uint retCode, 
         uint cptId, 
         int cptVersion
     );
 
+
+    // todo 注册 CPT 模板信息
     function registerCpt(
-        uint cptId,
-        address publisher, 
+        uint cptId,                         // 发布该 cpt 模板的 个人或者机构的 WeId
+        address publisher,                  //
         int[8] intArray, 
         bytes32[8] bytes32Array,
         bytes32[128] jsonSchemaArray, 

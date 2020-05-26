@@ -20,6 +20,7 @@ pragma solidity ^0.4.4;
 
 import "./AuthorityIssuerData.sol";
 
+// Claim Protocol Type (CPT) 数据合约
 contract CptData {
     // CPT ID has been categorized into 3 zones: 0 - 999 are reserved for system CPTs,
     //  1000-2000000 for Authority Issuer's CPTs, and the rest for common WeIdentiy DIDs.

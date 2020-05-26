@@ -25,6 +25,7 @@ import "./Evidence.sol";
  * Evidence factory contract, also support evidence address lookup service.
  */
 
+// 凭证工厂合约
 contract EvidenceFactory {
     Evidence private evidence;
 

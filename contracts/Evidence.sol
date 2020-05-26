@@ -23,6 +23,7 @@ pragma solidity ^0.4.4;
  * Evidence contract, created by Factory class.
  */
 
+// 凭证数据合约
 contract Evidence {
     bytes32[] private dataHash;
     address[] private signer;

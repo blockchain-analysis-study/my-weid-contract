@@ -19,6 +19,8 @@ pragma experimental ABIEncoderV2;
  *       You should have received a copy of the GNU Lesser General Public License
  *       along with weidentity-contract.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+// 数据桶合约
 contract DataBucket {
     
     string[] hashList;      // all hash

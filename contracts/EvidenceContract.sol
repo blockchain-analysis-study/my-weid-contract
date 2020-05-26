@@ -2,7 +2,7 @@ pragma solidity ^0.4.25;
 pragma experimental ABIEncoderV2;
 
 /*
- *       Copyright� (2018-2020) WeBank Co., Ltd.
+ *       Copyright� (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-contract.
  *
@@ -20,6 +20,7 @@ pragma experimental ABIEncoderV2;
  *       along with weidentity-contract.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// 凭证合约
 contract EvidenceContract {
 
     // block number map, hash as key

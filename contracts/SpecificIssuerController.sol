@@ -26,18 +26,24 @@ import "./RoleController.sol";
  * Controller contract managing issuers with specific types info.
  */
 
+// todo 特殊发行人 流程控制合约
 contract SpecificIssuerController {
 
+    // 特殊发行人 数据合约
     SpecificIssuerData private specificIssuerData;
+    // 权限合约
     RoleController private roleController;
 
     // Event structure to store tx records
+    // 用于存储TX记录的事件结构
     uint constant private OPERATION_ADD = 0;
     uint constant private OPERATION_REMOVE = 1;
 
+    // 特殊发行人的 操作动作event
     event SpecificIssuerRetLog(uint operation, uint retCode, bytes32 typeName, address addr);
 
     // Constructor.
+    // 构造函数
     function SpecificIssuerController(
         address specificIssuerDataAddress,
         address roleControllerAddress
@@ -48,6 +54,7 @@ contract SpecificIssuerController {
         roleController = RoleController(roleControllerAddress);
     }
 
+    //
     function registerIssuerType(bytes32 typeName) public {
         uint result = specificIssuerData.registerIssuerType(typeName);
         SpecificIssuerRetLog(OPERATION_ADD, result, typeName, 0x0);

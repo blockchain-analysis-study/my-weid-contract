@@ -23,16 +23,22 @@ pragma solidity ^0.4.4;
  * Stores data about issuers with specific types.
  */
 
+// 特殊发行人 数据合约
 contract SpecificIssuerData {
 
     // Error codes
+    // 错误码
     uint constant private RETURN_CODE_SUCCESS = 0;
     uint constant private RETURN_CODE_FAILURE_ALREADY_EXISTS = 500501;
     uint constant private RETURN_CODE_FAILURE_NOT_EXIST = 500502;
     uint constant private RETURN_CODE_FAILURE_EXCEED_MAX = 500503;
 
+
+    // todo 发行类型 ??
     struct IssuerType {
         // typeName as index, dynamic array as getAt function and mapping as search
+        //
+        // typeName作为索引，动态数组作为getAt函数，映射作为搜索
         bytes32 typeName;
         address[] fellow;
         mapping (address => bool) isFellow;

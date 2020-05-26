@@ -25,19 +25,25 @@ import "./RoleController.sol";
  * CommitteeMember data contract.
  */
 
+// 委员会 数据合约
 contract CommitteeMemberData {
 
+    // 一些状态码
     uint constant private RETURN_CODE_SUCCESS = 0;
     uint constant private RETURN_CODE_FAILURE_ALREADY_EXISTS = 500251;
     uint constant private RETURN_CODE_FAILURE_NOT_EXIST = 500252;
 
+    // 委员会成员Addr数组
     address[] private committeeMemberArray;
+    // 权限控制合约
     RoleController private roleController;
 
+    // 构造函数
     function CommitteeMemberData(address addr) public {
         roleController = RoleController(addr);
     }
 
+    // 判断某个addr是否是委员会成员
     function isCommitteeMember(
         address addr
     ) 
@@ -55,6 +61,8 @@ contract CommitteeMemberData {
         return false;
     }
 
+
+    // 添加委员会成员
     function addCommitteeMemberFromAddress(
         address addr
     ) 
@@ -72,6 +80,7 @@ contract CommitteeMemberData {
         return RETURN_CODE_SUCCESS;
     }
 
+    // 删除委员会成员
     function deleteCommitteeMemberFromAddress(
         address addr
     ) 
@@ -97,6 +106,8 @@ contract CommitteeMemberData {
         return RETURN_CODE_SUCCESS;
     }
 
+
+    // 获取当前 委员会成员Addr个数
     function getDatasetLength() 
         public 
         constant 
@@ -105,6 +116,7 @@ contract CommitteeMemberData {
         return committeeMemberArray.length;
     }
 
+    // 根据索引获取委员会成员addr
     function getCommitteeMemberAddressFromIndex(
         uint index
     ) 

@@ -26,9 +26,13 @@ import "./RoleController.sol";
  * Issuer contract manages authority issuer info.
  */
 
+// todo 委员会 流程控制合约
+// 用于管理 权威发行人实体
 contract CommitteeMemberController {
 
+    // 委员会 数据合约
     CommitteeMemberData private committeeMemberData;
+    // 权限控制合约
     RoleController private roleController;
 
     // Event structure to store tx records
