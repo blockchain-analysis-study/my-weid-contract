@@ -64,17 +64,21 @@ contract CommitteeMemberData {
 
     // 添加委员会成员
     function addCommitteeMemberFromAddress(
-        address addr
+        address addr  // 委员会成员 WeId
     ) 
         public
         returns (uint)
     {
+
+        // 是否已经存在
         if (isCommitteeMember(addr)) {
             return RETURN_CODE_FAILURE_ALREADY_EXISTS;
         }
         if (!roleController.checkPermission(tx.origin, roleController.MODIFY_COMMITTEE())) {
             return roleController.RETURN_CODE_FAILURE_NO_PERMISSION();
         }
+
+        // 给 当前 WeId 添加 委员会角色
         roleController.addRole(addr, roleController.ROLE_COMMITTEE());
         committeeMemberArray.push(addr);
         return RETURN_CODE_SUCCESS;

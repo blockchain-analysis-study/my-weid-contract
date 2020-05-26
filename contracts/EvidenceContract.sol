@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
  *       along with weidentity-contract.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// 凭证合约
+// 凭证合约 todo 入口合约
 contract EvidenceContract {
 
     // block number map, hash as key

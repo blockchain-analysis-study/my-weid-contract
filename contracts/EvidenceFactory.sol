@@ -25,14 +25,20 @@ import "./Evidence.sol";
  * Evidence factory contract, also support evidence address lookup service.
  */
 
-// 凭证工厂合约
+// 凭证工厂合约, 用来操作 Evidence 合约
 contract EvidenceFactory {
+
+    // Evidence 合约实例
     Evidence private evidence;
 
     // Event and Constants.
+    //
+    // Event 的状态码
     uint constant private RETURN_CODE_SUCCESS = 0;
     uint constant private RETURN_CODE_FAILURE_ILLEGAL_INPUT = 500401;
 
+
+    //
     event CreateEvidenceLog(uint retCode, address addr);
     event PutEvidenceLog(uint retCode, address addr);
 
@@ -57,7 +63,11 @@ contract EvidenceFactory {
                 return false;
             }
         }
+
+
         Evidence evidence = new Evidence(dataHash, signer, r, s, v, extra);
+
+
         CreateEvidenceLog(RETURN_CODE_SUCCESS, evidence);
         return true;
     }

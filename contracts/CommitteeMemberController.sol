@@ -51,16 +51,21 @@ contract CommitteeMemberController {
         committeeMemberData = CommitteeMemberData(committeeMemberDataAddress);
         roleController = RoleController(roleControllerAddress);
     }
-    
+
+    // 添加 委员会成员
     function addCommitteeMember(
-        address addr
+        address addr  // 委员会 WeId
     ) 
         public 
     {
+
+        // 只有 admin 账户才可以 更改 委员会成员
         if (!roleController.checkPermission(tx.origin, roleController.MODIFY_COMMITTEE())) {
             CommitteeRetLog(OPERATION_ADD, roleController.RETURN_CODE_FAILURE_NO_PERMISSION(), addr);
             return;
         }
+
+        // 添加委员会成员
         uint result = committeeMemberData.addCommitteeMemberFromAddress(addr);
         CommitteeRetLog(OPERATION_ADD, result, addr);
     }

@@ -289,6 +289,8 @@ contract CptController {
             // 使用旧的 createTimeStamp, 因为 createTime 不可能因为 udate 动作而变更吧
             int created = cptIntArray[1];
             intArray[1] = created;
+
+            // 更新 cpt 模板
             cptData.putCpt(cptId, publisher, intArray, bytes32Array, jsonSchemaArray, v, r, s);
             UpdateCptRetLog(0, cptId, cptVersion);
             return true;
@@ -298,6 +300,8 @@ contract CptController {
         }
     }
 
+
+    // 根据对应的 cptId 查询 cpt模板详情
     function queryCpt(
         uint cptId
     ) 
@@ -349,6 +353,7 @@ contract CptController {
         return dynamicBytes32Array;
     }
 
+    // 查询 CPT的jsonStr
     function getCptDynamicJsonSchemaArray(
         uint cptId
     ) 

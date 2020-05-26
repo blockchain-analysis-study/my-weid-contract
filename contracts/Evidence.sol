@@ -25,11 +25,19 @@ pragma solidity ^0.4.4;
 
 // 凭证数据合约
 contract Evidence {
+
+    // 凭证的 Hash
     bytes32[] private dataHash;
+
+    // 凭证的签名
     address[] private signer;
+
+    // 签名的三部分
     bytes32[] private r;
     bytes32[] private s;
     uint8[] private v;
+
+
     bytes32[] private extraContent;
 
     // Event and Constants.

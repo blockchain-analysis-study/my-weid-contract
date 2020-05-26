@@ -166,6 +166,8 @@ contract CptData {
         }
     }
 
+
+    // 获取 CPT 模板详情
     function getCpt(
         uint cptId
     ) 
@@ -190,6 +192,8 @@ contract CptData {
         s = cpt.signature.s;
     } 
 
+
+    // 根据 cptId 查询对应 cpt模板的 发布者
     function getCptPublisher(
         uint cptId
     ) 
@@ -201,6 +205,8 @@ contract CptData {
         publisher = cpt.publisher;
     }
 
+
+    // int[8]{0<version>, createTimeStamp}
     function getCptIntArray(
         uint cptId
     ) 
@@ -212,6 +218,8 @@ contract CptData {
         intArray = cpt.intArray;
     }
 
+
+    // 根据 cptId 查询 CPT模板的 jsonStr
     function getCptJsonSchemaArray(
         uint cptId
     ) 
@@ -234,6 +242,7 @@ contract CptData {
         bytes32Array = cpt.bytes32Array;
     }
 
+    // 查询 signature
     function getCptSignature(
         uint cptId
     ) 
@@ -247,6 +256,8 @@ contract CptData {
         s = cpt.signature.s;
     }
 
+
+    // 判断 cpt 是否已经存在
     function isCptExist(
         uint cptId
     ) 
@@ -254,6 +265,10 @@ contract CptData {
         constant 
         returns (bool)
     {
+
+        // 主要版本 不等于0时,
+        // int[8]{0<version>, createTimeStamp}
+        // todo 但是开始设置 cpt 的时候, 默认的版本号不就是0么 ？？
         int[8] memory intArray = getCptIntArray(cptId);
         if (intArray[0] != 0) {
             return true;
