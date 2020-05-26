@@ -119,8 +119,10 @@ contract CptController {
 
     // todo 注册 CPT 模板信息
     function registerCpt(
-        uint cptId,                         // 发布该 cpt 模板的 个人或者机构的 WeId
-        address publisher,                  //
+        uint cptId,                         // 当前 CPT Id
+
+        //
+        address publisher,                  // 发布该 cpt 模板的 个人或者机构的 WeId
         int[8] intArray, 
         bytes32[8] bytes32Array,
         bytes32[128] jsonSchemaArray, 
