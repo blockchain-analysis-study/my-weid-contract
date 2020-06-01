@@ -34,7 +34,7 @@ contract SpecificIssuerData {
     uint constant private RETURN_CODE_FAILURE_EXCEED_MAX = 500503;
 
 
-    // todo 发行类型 ??
+    // todo 发行人 类型 实体
     struct IssuerType {
         // typeName as index, dynamic array as getAt function and mapping as search
         //
@@ -47,6 +47,8 @@ contract SpecificIssuerData {
 
     mapping (bytes32 => IssuerType) private issuerTypeMap;
 
+
+    // 注册一个新的 发行者 类型
     function registerIssuerType(bytes32 typeName) public returns (uint) {
         if (isIssuerTypeExist(typeName)) {
             return RETURN_CODE_FAILURE_ALREADY_EXISTS;

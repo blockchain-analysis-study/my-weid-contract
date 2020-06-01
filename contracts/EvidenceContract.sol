@@ -31,6 +31,10 @@ contract EvidenceContract {
 
 
     // hash map, extra id string as key, hash as value
+    //
+    //  使用自定义的 拓展信息作为 key, 描述对应的  Evidence Hash
+    //
+    // (extraKey => Evidence Hash)
     mapping(string => bytes32) extraKeyMapping;
 
     // Evidence attribute change event including signature and logs
@@ -47,13 +51,15 @@ contract EvidenceContract {
     );
     
     // Additional Evidence attribute change event
+    //
+    // 其他证据属性更改事件
     event EvidenceExtraAttributeChanged(
-        bytes32[] hash,
-        address[] signer,
-        string[] keys,
-        string[] values,
-        uint256[] updated,
-        uint256[] previousBlock
+        bytes32[] hash,                     // Evidence Hash
+        address[] signer,                   // 签名人,WeId
+        string[] keys,                      // 属性的Key 数组
+        string[] values,                    // 属性的Value 数组
+        uint256[] updated,                  // 更新时间数组
+        uint256[] previousBlock             //
     );
 
 
@@ -136,13 +142,13 @@ contract EvidenceContract {
         address[] signer,                   // 对Evidence进行签名的 账户 (该addr 对应的 priKey进行的签名)
         string[] sigs,                      // priKey对 Evidence Hash 做的签名
         string[] logs,                      // 对应SDK 的 Extra 字段, 无特殊要求 一般为 ""
-        uint256[] updated,                  //
-        string[] extraKey                   //
+        uint256[] updated,                  // timeStamp
+        string[] extraKey                   // EvidenceHash 的描述信息 ??
     )
         public
     {
 
-        // 
+        // 遍历所有的 Evidence Hash
         uint256 sigSize = hash.length;
         bytes32[] memory hashs = new bytes32[](sigSize);
         string[] memory sigss = new string[](sigSize);
@@ -155,21 +161,33 @@ contract EvidenceContract {
             if (isEqualString(sigs[i], "") && !isHashExist(thisHash)) {
                 continue;
             }
+
+            // copy 到对应数组的索引处
             hashs[i] = thisHash;
             sigss[i] = sigs[i];
             logss[i] = logs[i];
             signers[i] = signer[i];
             updateds[i] = updated[i];
+
+            // 没操作一个 Evidence Hash 数据, 我们就记录 该Hash 的上一个 blockNumber
             previousBlocks[i] = changed[thisHash];
+
+            // 记录当前Hash 的 blockNumber
             changed[thisHash] = block.number;
+
+            // 将对应 Evidence Hash 的关键描述信息和 Evidence Hash 关联起来
             extraKeyMapping[extraKey[i]] = thisHash;
         }
+
+        // 利用 Event 记录 Evidence
         emit EvidenceAttributeChanged(hashs, signers, sigss, logss, updateds, previousBlocks);
     }
     
      /**
       * Set arbitrary extra attributes to any EXISTING evidence.
      */
+    //
+    // 为任何现有证据设置任意额外的属性  todo 目前只有 FISCO V1 才用到
     function setAttribute(
         bytes32[] hash,
         address[] signer,
@@ -201,6 +219,8 @@ contract EvidenceContract {
         emit EvidenceExtraAttributeChanged(hashs, signers, keys, values, updateds, previousBlocks);
     }
 
+
+    // 判断某个 EvidenceHash 是否存在
     function isHashExist(bytes32 hash) public constant returns (bool) {
         if (changed[hash] != 0) {
             return true;
@@ -208,6 +228,8 @@ contract EvidenceContract {
         return false;
     }
 
+
+    // 根据自定义的 拓展key, 返回对应的 Evidence Hash
     function getHashByExtraKey(
         string extraKey
     )
@@ -218,6 +240,8 @@ contract EvidenceContract {
         return extraKeyMapping[extraKey];
     }
 
+
+    // 额, 判断两个 Str 是否相等, 使用 keccak256 Hash 比较
     function isEqualString(string a, string b) private constant returns (bool) {	
         if (bytes(a).length != bytes(b).length) {	
             return false;	

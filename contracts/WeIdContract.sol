@@ -80,6 +80,8 @@ contract WeIdContract {
     // 变更 identity 的相关信息
     //
     // 下列参数说明, 均取自 sdk源码剖析
+    //
+    // todo 注意, 在创建时 是制定可一个 auth 的哦
     function createWeId(
         address identity,   // did 其实是下面 publicKey生成的address
         bytes auth,         // auth: publicKey/weAddress
@@ -100,6 +102,7 @@ contract WeIdContract {
     }
 
     // 委托创建  identity
+    // todo 注意, 在创建时 是制定可一个 auth 的哦
     function delegateCreateWeId(
         address identity,     // did 其实是下面 publicKey生成的address
         bytes auth,           // auth: publicKey/weAddress
@@ -116,6 +119,7 @@ contract WeIdContract {
         if (roleController.checkPermission(msg.sender, roleController.MODIFY_AUTHORITY_ISSUER())) {
 
             // 存储 identity 的创建 timestamp 和 blockNumber 等信息
+            // Event(weId, key, value, preBlockNumber, time)
             WeIdAttributeChanged(identity, WEID_KEY_CREATED, created, changed[identity], updated);
             // 存储 identity 的 publicKey和address 信息
             WeIdAttributeChanged(identity, WEID_KEY_AUTHENTICATION, auth, changed[identity], updated);
@@ -126,10 +130,10 @@ contract WeIdContract {
 
     // 给对应的identity设置 属性 (Document 的各个字段)
     //
-    // SET PubKey时                     key: /weId/pubkey/publicKeyTypeName/base64  | value: pubKey/owner
-    // SET Authentication时             key: /weId/auth                             | value: publicKey/owner
-    //
-    //
+    // SET PubKey时                     key: /weId/pubkey/{publicKeyTypeName}/base64       | value: {pubKey}/{owner}
+    // SET Authentication时             key: /weId/auth                                    | value: {publicKey}/{owner}
+    // SET Service时                    key: /weId/service/{serviceType}                   | value: {serviceEndpoint} (就是个URL)
+    // SET ...
     //
     function setAttribute(
         address identity,   // did, 其实就是个address

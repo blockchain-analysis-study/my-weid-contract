@@ -27,6 +27,12 @@ import "./RoleController.sol";
  */
 
 // todo 特殊发行人 流程控制合约
+//
+// WeIdentity支持为每位Authority Issuer在链上声明所属类型，即Specific Issuer
+// 您可以指定某位Authority Issuer的具体类型属性，如学校、政府机构、医院等。
+// 当前，此属性与其对应的权限没有直接关系，仅作记录之目的。
+//
+// todo 由此可知, SpecificIssuer 其实就是为 AuthorityIssuer 做记录的
 contract SpecificIssuerController {
 
     // 特殊发行人 数据合约
@@ -36,11 +42,18 @@ contract SpecificIssuerController {
 
     // Event structure to store tx records
     // 用于存储TX记录的事件结构
+
+    // event 的key
     uint constant private OPERATION_ADD = 0;
     uint constant private OPERATION_REMOVE = 1;
 
     // 特殊发行人的 操作动作event
-    event SpecificIssuerRetLog(uint operation, uint retCode, bytes32 typeName, address addr);
+    event SpecificIssuerRetLog(
+        uint operation,             // 操作类型
+        uint retCode,               // 结果状态码
+        bytes32 typeName,           // 发行者类型Name
+        address addr                // 发行者的WeId
+    );
 
     // Constructor.
     // 构造函数
@@ -54,7 +67,7 @@ contract SpecificIssuerController {
         roleController = RoleController(roleControllerAddress);
     }
 
-    //
+    // 注册一个新的 发行者 类型
     function registerIssuerType(bytes32 typeName) public {
         uint result = specificIssuerData.registerIssuerType(typeName);
         SpecificIssuerRetLog(OPERATION_ADD, result, typeName, 0x0);
