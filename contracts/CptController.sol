@@ -91,7 +91,7 @@ contract CptController {
             return;
         }
 
-        // 实例化 role合约
+        // 实例化 角色合约
         roleController = RoleController(roleControllerAddress);
         if (roleController.ROLE_ADMIN() <= 0) { // 其实这一句 一般不会走的
             return;

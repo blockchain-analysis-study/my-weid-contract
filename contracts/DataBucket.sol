@@ -21,20 +21,38 @@ pragma experimental ABIEncoderV2;
  */
 
 // 数据桶合约
+//
+// 存储  CNS 数据
+//
+// 这里面是会某些 Admin 创建自己的一套 DID体系, 并记录了 哪些联盟加入了该Admin的DID体系
 contract DataBucket {
-    
+
+    // 记录所有Hash 列表
     string[] hashList;      // all hash
-    
+
+    // 一个记录了 某个合约发行者的sender 地址和他发行的所有DID相关业务合约地址的总Hash的信息
     struct DataStruct {
+
+        // 所有 DID 业务合约的地址的总Hash
         string hash;         // the hash
+
+        // 某个合约部署人
         address owner;        // owner for hash
+
+        // 启动当前 DataStruct 的 sender集
         address[] useAddress; // the user list for use this hash
+
         bool isUsed;           // the hash is be useed
+
+        // 当前Hash 在Hash List中的us噢因
         uint256 index;        // the hash index in hashList
+
+        // 创建时间
         uint256 timestamp;    // the first time for create hash
         mapping(bytes32 => string) kv; //the mapping for store the key--value
     }
-    
+
+    // (一个所有业务合约的 Hash 值  => DataStruct)
     mapping(string => DataStruct) hashData; // hash-->DataStruct
     
     uint8 constant private SUCCESS = 100;
@@ -52,15 +70,15 @@ contract DataBucket {
      * @return code the code for result
      */ 
     function put(
-        string hash, 
-        bytes32 key, 
-        string value
+        string hash,  // 总的 合约地址的 总Hash
+        bytes32 key,  // 当前合约类型, 一个字符串, 如: "WeIdContract"、"AuthorityIssuerController" 等等
+        string value  // 对应的合约Addr
     ) 
         public 
         returns (uint8 code) 
     {
         DataStruct storage data = hashData[hash];
-        //the first put hash
+        //the first put hash  第一次时, 我们才 put Hash
         if (data.owner == address(0x0)) {
             data.hash = hash;
             data.owner = msg.sender;
@@ -73,6 +91,8 @@ contract DataBucket {
             if (data.owner != msg.sender) {
                  return NO_PERMISSION;
             }
+
+            // 变更
             data.kv[key] = value;
             return SUCCESS;
         }
@@ -89,20 +109,31 @@ contract DataBucket {
     ) 
         internal 
     {
+
+        // 现在 hashList 中找到一个 空Hash 的索引 (用于填充空洞)
         // find the first empty index.
         int8 emptyIndex = -1;
         for (uint8 i = 0; i < hashList.length; i++) {
+
+            // 是否为 空Hash
             if (isEqualString(hashList[i], "")) {
                 emptyIndex = int8(i);
                 break;
             }
         }
+
+        // 如果不能找到存在 空Hash 的索引
         // can not find the empty index, push data to last
         if (emptyIndex == -1) {
+            // 直接向末尾追加当前 Hash
             hashList.push(data.hash);
+
+            // 记录索引
             data.index = hashList.length - 1;
         } else {
             // push data by index
+            //
+            // 否则, 填充空洞处
             uint8 index = uint8(emptyIndex);
             hashList[index] = data.hash;
             data.index = index;
@@ -169,6 +200,7 @@ contract DataBucket {
     }
     
     /**
+     * 启用 当前Hash 中所有 合约
      * enable the hash.
      * @param hash the hash
      */
@@ -233,6 +265,7 @@ contract DataBucket {
     }
     
     /**
+     * 只有全清掉 useAddress 集时, 才会返回 false
      * true is THE_HASH_IS_USED, false THE_HASH_IS_NOT_USED.
      */
     function hasUse(
@@ -268,7 +301,7 @@ contract DataBucket {
             return THE_HASH_IS_NOT_USED;
         }
         removeUseAddress(data);
-        data.isUsed = hasUse(data);
+        data.isUsed = hasUse(data); // 只有全清掉 useAddress 集时, 才会返回 false, 就是说只有全清掉 useAddress时才会将标识位的 true 改成 false
         return SUCCESS;
     }
     
