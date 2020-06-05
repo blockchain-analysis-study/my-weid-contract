@@ -66,9 +66,9 @@ contract AuthorityIssuerController {
     // 添加权威发行人
     function addAuthorityIssuer(
         address addr,               // issuer 的 weId
-        bytes32[16] attribBytes32,  // byte[name, 16]
-        int[16] attribInt,          // byte[timestamp, 16]
-        bytes accValue              //
+        bytes32[16] attribBytes32,  // byte[name]
+        int[16] attribInt,          // byte[timestamp]
+        bytes accValue              // 授权方累积判定值 todo 问了官方的人, 说是 该发行人所有发行的 Credential 中 素数的乘积 Accumulator 的值 (有凭证撤销的时候, 这个值就会改变)
     )
         public
     {
