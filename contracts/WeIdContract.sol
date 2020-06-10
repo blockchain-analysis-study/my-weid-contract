@@ -58,6 +58,15 @@ contract WeIdContract {
     // todo  形成 event 链, 可以方便 后续热拓展 Document的字段
     // 当还原一个 Document 时候, 我们并不需要知道该 Document 有几个字段的值, 我们只需要从event 两边从后往前找,
     // 找出之前放置到 event 中的 Document 的各个字段, 由SDK去保证 Document 各个字段的最新值
+
+    // 给对应的identity设置 属性 (Document 的各个字段)
+    //
+    // SET PubKey时                     key: /weId/pubkey/{publicKeyTypeName}/base64       | value: {pubKey}/{owner}
+    // SET Authentication时             key: /weId/auth                                    | value: {publicKey}/{owner}
+    // SET Service时                    key: /weId/service/{serviceType}                   | value: {serviceEndpoint} (就是个URL)
+    // SET ...
+    //
+
     event WeIdAttributeChanged(
         address indexed identity,
         bytes32 key,

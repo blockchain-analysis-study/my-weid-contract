@@ -41,6 +41,8 @@ contract EvidenceContract {
     //
     // 证据属性 更改事件，包括签名和日志
     // todo 主要用来存储 Evidence 信息
+    //
+    // 在 `createEvidence()` 和 `createEvidenceWithExtraKey()` 用到
     event EvidenceAttributeChanged(
         bytes32[] hash,
         address[] signer,
@@ -53,6 +55,8 @@ contract EvidenceContract {
     // Additional Evidence attribute change event
     //
     // 其他证据属性更改事件
+    //
+    // 在 `setAttribute()` 用到
     event EvidenceExtraAttributeChanged(
         bytes32[] hash,                     // Evidence Hash
         address[] signer,                   // 签名人,WeId
