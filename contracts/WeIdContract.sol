@@ -61,7 +61,7 @@ contract WeIdContract {
 
     // 给对应的identity设置 属性 (Document 的各个字段)
     //
-    // SET PubKey时                     key: /weId/pubkey/{publicKeyTypeName}/base64       | value: {pubKey}/{owner}
+    // SET PubKey时                     key: /weId/pubkey/{publicKeyTypeName}/base64       | value: {publicKey}/{owner}
     // SET Authentication时             key: /weId/auth                                    | value: {publicKey}/{owner}
     // SET Service时                    key: /weId/service/{serviceType}                   | value: {serviceEndpoint} (就是个URL)
     // SET ...
@@ -102,10 +102,12 @@ contract WeIdContract {
     {
         // todo 使用 event 的形式存储
 
-        // 存储 identity 的创建 timestamp 和 blockNumber 等信息
+        // 存储 identity 的创建 timestamp 和 blockNumber 等信息 create
         WeIdAttributeChanged(identity, WEID_KEY_CREATED, created, changed[identity], updated);
-        // 存储 identity 的 publicKey和address 信息
+        // 存储 identity 的 publicKey和address 信息  auth
         WeIdAttributeChanged(identity, WEID_KEY_AUTHENTICATION, auth, changed[identity], updated);
+
+        // 没有  pubkey
         // 存储最会一次变更 identity的blockNumber
         changed[identity] = block.number;
     }
